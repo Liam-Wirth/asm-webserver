@@ -1,0 +1,8 @@
+build/
+obj/
+
+build/*
+
+*.o
+
+*.toml

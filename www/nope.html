@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Nice Try!</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f0f0f0;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                text-align: center;
+            }
+            .message {
+                background-color: white;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                margin: 20px;
+            }
+            h1 {
+                color: #ff4444;
+                font-size: 48px;
+                margin-bottom: 20px;
+            }
+            img {
+                max-width: 500px;
+                margin: 20px 0;
+                border-radius: 10px;
+            }
+            a {
+                color: #2196f3;
+                text-decoration: none;
+                font-weight: bold;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="message">
+                <h1>Nice Try!</h1>
+                <p>
+                    Path traversal attempt detected. We're keeping an eye on
+                    you!
+                </p>
+                <img src="/traversal.jpg" alt="Nice Try!" />
+                <p><a href="/index.html">Go back to safety</a></p>
+            </div>
+        </div>
+    </body>
+</html>

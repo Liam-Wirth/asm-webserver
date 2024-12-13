@@ -1,0 +1,22 @@
+[default_config]
+version = "0.9.0"
+assembler = "nasm"
+instruction_set = "x86/x86-64"
+
+[default_config.opts]
+compiler = "nasm"
+compile_flags_txt = []
+diagnostics = true
+default_diagnostics = false
+
+[[project]]
+path = ""
+version = "0.9.0"
+assembler = "nasm"
+instruction_set = "x86/x86-64"
+
+[project.opts]
+compiler = "nasm"
+compile_flags_txt = []
+diagnostics = true
+default_diagnostics = false
