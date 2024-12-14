@@ -35,11 +35,11 @@
 - [x] Basic directory structure (/www)
 - [x] Default file (index.html)
 - [x] Handle file not found
-- [ ] Complete MIME type detection
+- [x] Complete MIME type detection
 - [x] Basic directory security
 
 
-## Essential Security
+## Essential Security (Only handling GET requests rn)
 - [x] Validate request paths
 - [x] Prevent directory traversal
 - [x] Character validation
@@ -61,7 +61,7 @@
 
 
 ## Maybe Later:
-- [ ]  Multiple concurrent connections
+- [x]  Multiple concurrent connections
 - [ ]  Keep-alive connections
 - [ ]  Request/response compression
 - [ ]  Virtual hosting
