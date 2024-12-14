@@ -20,7 +20,7 @@
 ## Response Generation
 - [x] Send basic HTTP status codes:
   - [x] 200 OK
-  - [ ] 404 Not Found
+  - [x] 404 Not Found
   - [x] 403 Forbidden
   - [ ] 500 Server Error
 - [x] Include some headers:
@@ -34,7 +34,7 @@
 - [x] Read static files
 - [x] Basic directory structure (/www)
 - [x] Default file (index.html)
-- [ ] Handle file not found
+- [x] Handle file not found
 - [ ] Complete MIME type detection
 - [x] Basic directory security
 
