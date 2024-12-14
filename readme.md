@@ -66,3 +66,11 @@
 - [ ]  Request/response compression
 - [ ]  Virtual hosting
 - [ ]  HTTPS support
+
+
+
+
+
+
+# Links and stuff
+https://www.reddit.com/r/C_Programming/comments/kbfa6t/building_a_http_server_in_c/

@@ -4,7 +4,7 @@ section .rodata
 
 ; Success Messages
 MSG_SERVER_START:
-    db "Server started on port 8270", 10
+    db "Server started on port 8270 \n you can visit it here: http://localhost:8270", 10
 MSG_SERVER_START_LEN equ $ - MSG_SERVER_START
 
 ; Error Messages
@@ -47,6 +47,10 @@ MSG_OPEN_ERR_LEN equ $ - MSG_OPEN_ERR
 MSG_CLOSE_ERR:
     db "Error: Failed to close socket", 10
 MSG_CLOSE_ERR_LEN equ $ - MSG_CLOSE_ERR
+
+MSG_404_ERR:
+    db "Error: 404 Not Found", 10
+MSG_404_ERR_LEN equ $ - MSG_404_ERR
 
 ; Status Messages
 MSG_REQUEST_RECEIVED:
