@@ -18,6 +18,7 @@
 
 
 ## Response Generation
+- [ ] Shift to sending inlined html (in the asm) to prevent issue of missing html files
 - [x] Send basic HTTP status codes:
   - [x] 200 OK
   - [x] 404 Not Found
@@ -74,3 +75,4 @@
 
 # Links and stuff
 https://www.reddit.com/r/C_Programming/comments/kbfa6t/building_a_http_server_in_c/
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500

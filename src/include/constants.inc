@@ -27,3 +27,5 @@
 %define SYS_SIGACTION   13
 %define SIGINT          2
 %define SA_RESTORER     0x04000000
+
+%define RESP_BUF_LEN    512
