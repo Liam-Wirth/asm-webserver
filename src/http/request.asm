@@ -53,6 +53,8 @@ handle_request:
 ; Input: rdi - pointer to path
 ; Output: rax - 0 if path is invalid, 1 if valid
 validate_path:
+    push rbp
+    mov  rbp, rsp
     push rbx
     push rcx
     push rdx
@@ -61,18 +63,32 @@ validate_path:
 
     mov rbx, rdi ; Store original path pointer
 
+    ; Check path length
+    xor rcx, rcx
+.length_loop:
+    cmp byte [rbx + rcx], 0
+    je  .check_length
+    inc rcx
+    cmp rcx, 256        ; Max path length
+    jge .invalid_path
+    jmp .length_loop
+
+.check_length:
+    test rcx, rcx
+    jz   .invalid_path  ; Empty path
+
     ; Check for whitelisted paths first
     mov rsi, whitelist_paths
 .check_whitelist:
-    mov rdi, rbx ; Original path
-    mov rcx, rsi ; Current whitelist entry
+    mov rdi, rbx        ; Original path
+    mov rcx, rsi        ; Current whitelist entry
 .whitelist_loop:
     mov  al, byte [rdi]
     mov  dl, byte [rcx]
     test dl, dl
-    jz   .whitelist_match ; End of whitelist entry = match
+    jz   .whitelist_match
     test al, al
-    jz   .whitelist_next  ; End of path = no match
+    jz   .whitelist_next
     cmp  al, dl
     jne  .whitelist_next
     inc  rdi
@@ -88,30 +104,74 @@ validate_path:
     inc rcx
     jmp .find_next
 .found_next:
-    inc rcx                  ; Skip null terminator
-    mov rsi,        rcx
-    cmp byte [rsi], 0        ; Check if at end of whitelist
+    inc rcx
+    mov rsi, rcx
+    cmp byte [rsi], 0
     jz  .continue_validation
     jmp .check_whitelist
 
 .whitelist_match:
-    mov rax, 1   ; Path is whitelisted
+    mov rax, 1
     jmp .cleanup
 
 .continue_validation:
-    ; First check: bad characters
-    mov rdx, rbx ; Current position in path
-.check_bad_chars:
+    ; Check for suspicious patterns
+    mov rsi, suspicious_patterns
+.check_patterns:
+    mov rdi, rbx        ; Path to check
+    mov rcx, rsi        ; Current pattern
+.pattern_loop:
+    mov  al, byte [rdi]
+    mov  dl, byte [rcx]
+    test dl, dl
+    jz   .pattern_next_char
+    test al, al
+    jz   .pattern_next
+    cmp  al, dl
+    jne  .pattern_next
+    inc  rdi
+    inc  rcx
+    jmp  .pattern_loop
+
+.pattern_next_char:
+    test byte [rdi], 0
+    jz   .invalid_path  ; Pattern found at end of string
+
+.pattern_next:
+    ; Move to next pattern
+    mov rcx, rsi
+.find_pattern_end:
+    cmp byte [rcx], 0
+    jz  .next_pattern
+    inc rcx
+    jmp .find_pattern_end
+.next_pattern:
+    inc rcx
+    mov rsi, rcx
+    cmp byte [rsi], 0
+    jz  .check_chars
+    jmp .check_patterns
+
+.check_chars:
+    ; Check each character
+    mov rdx, rbx
+.char_loop:
     movzx eax, byte [rdx]
-    test  al,  al
-    jz    .check_delims
+    test  al, al
+    jz    .check_final
+
+    ; Check if character is printable ASCII
+    cmp al, 32
+    jl  .invalid_path   ; Below space = control character
+    cmp al, 126
+    ja  .invalid_path   ; Above ~ = extended ASCII
 
     ; Check against bad_chars
     mov rsi, bad_chars
 .bad_char_loop:
     movzx ecx, byte [rsi]
-    test  cl,  cl
-    jz    .next_char
+    test  cl, cl
+    jz    .char_ok
 
     cmp al, cl
     je  .invalid_path
@@ -119,30 +179,39 @@ validate_path:
     inc rsi
     jmp .bad_char_loop
 
-.next_char:
+.char_ok:
     inc rdx
-    jmp .check_bad_chars
+    jmp .char_loop
 
-.check_delims:
-    ; Second check: count dots and slashes
-    xor ecx, ecx ; dot counter
-    xor edx, edx ; slash counter
+.check_final:
+    ; Final checks for dots and slashes
+    xor ecx, ecx        ; dot counter
+    xor edx, edx        ; slash counter
     mov rsi, rbx
 
 .count_loop:
     movzx eax, byte [rsi]
-    test  al,  al
+    test  al, al
     jz    .check_counts
 
     cmp al, '.'
     jne .check_slash
     inc ecx
+
+    ; Check for consecutive dots
+    cmp byte [rsi + 1], '.'
+    je  .invalid_path
+
     jmp .continue_count
 
 .check_slash:
     cmp al, '/'
     jne .continue_count
     inc edx
+
+    ; Check for consecutive slashes
+    cmp byte [rsi + 1], '/'
+    je  .invalid_path
 
 .continue_count:
     inc rsi
@@ -167,6 +236,7 @@ validate_path:
     pop rdx
     pop rcx
     pop rbx
+    pop rbp
     ret
 
 ; Function: handle_get
@@ -258,5 +328,46 @@ whitelist_paths:
     db "/", 0
     db 0
 
-; \:*?"<>|
-bad_chars: db 0x5C, 0x3A, 0x2A, 0x3F, 0x25, 0x22, 0x3C, 0x3E, 0x7C, 0
+suspicious_patterns:
+    db "/../", 0
+    db "./", 0
+    db "/..", 0
+    db "../", 0
+    db "/.git", 0
+    db "/.env", 0
+    db "/wp-", 0
+    db "/admin", 0
+    db "/.htaccess", 0
+    db "/config", 0
+    db 0
+
+bad_chars:
+    ; Basic special characters
+    db 0x5C  ; \
+    db 0x3A  ; :
+    db 0x2A  ; *
+    db 0x3F  ; ?
+    db 0x25  ; %
+    db 0x22  ; "
+    db 0x3C  ; <
+    db 0x3E  ; >
+    db 0x7C  ; |
+    db 0x23  ; #
+    db 0x20  ; Space
+    db 0x26  ; &
+    db 0x27  ; '
+    db 0x60  ; `
+    db 0x24  ; $
+    db 0x28  ; (
+    db 0x29  ; )
+    db 0x3B  ; ;
+    db 0x3D  ; =
+    db 0x2B  ; +
+    db 0x7B  ; {
+    db 0x7D  ; }
+    db 0x5B  ; [
+    db 0x5D  ; ]
+    db 0x0A  ; LF
+    db 0x0D  ; CR
+    db 0x09  ; Tab
+    db 0     ; Null terminator
